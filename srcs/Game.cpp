@@ -65,6 +65,14 @@ void Game::Draw() {
   case GAMEPLAY: {
     m_gameplay.Draw();
   } break;
+  case ENDING: {
+    if ((m_frameCounter / 30) % 2 == 0) {
+      DrawText("Press [ENTER] to go back to title",
+               GetScreenWidth() / 2 -
+                   MeasureText("Press [Enter] to go back to title", 20) / 2,
+               GetScreenHeight() / 2 + 60, 20, DARKGRAY);
+    }
+  } break;
   default:
     break;
   }

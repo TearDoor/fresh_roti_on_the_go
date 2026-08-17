@@ -1,5 +1,4 @@
 #include "Game.hpp"
-#include "raylib.h"
 
 int main(void) {
   const int WIDTH = 800;
