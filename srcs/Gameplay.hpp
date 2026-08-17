@@ -22,8 +22,9 @@ struct Enemy {
 
 struct Projectile {
   Vector2 m_position;
-  Vector2 m_speed;
+  Vector2 m_velocity;
   bool m_isFriendly;
+  float m_speed;
 };
 
 class Gameplay {
@@ -31,7 +32,8 @@ public:
   void Update();
   void Draw();
 
-  void spawnProjectile();
+  void spawnProjectile(const Vector2 &pos, const Vector2 &velocity,
+                       bool isFriend);
 
 private:
   Player m_player;

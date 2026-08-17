@@ -30,25 +30,48 @@ void Player::Update() {
   // thats why our angle start as facing right
   angle = atan2(GetMouseY() - m_position.y, GetMouseX() - m_position.x);
 
-  if (IsKeyDown(KEY_W)) {
-    m_position.y -= m_speed * GetFrameTime();
+  Vector2 inputDir;
+  if (IsKeyDown(KEY_W))
+    inputDir.y -= 1;
+  if (IsKeyDown(KEY_S))
+    inputDir.y += 1;
+  if (IsKeyDown(KEY_A))
+    inputDir.x -= 1;
+  if (IsKeyDown(KEY_D))
+    inputDir.x += 1;
+
+  if (inputDir.x != 0 || inputDir.y != 0) {
+    inputDir = Vector2Normalize(inputDir);
+    m_position = Vector2Add(m_position,
+                            Vector2Scale(inputDir, m_speed * GetFrameTime()));
   }
 }
 
 void Gameplay::Update() {
   m_player.Update();
 
-  if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-    spawnProjectile();
+  if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+    Vector2 dir = {cosf(m_player.angle), sinf(m_player.angle)};
+    Vector2 pos = Vector2Scale(dir, 20.0f);
+    spawnProjectile(Vector2Add(m_player.m_position, pos), dir, true);
   }
 
   for (auto &p : m_projectiles) {
-    p.m_position.x += p.m_speed.x * GetFrameTime();
-    p.m_position.y += p.m_speed.y * GetFrameTime();
+    p.m_position.x += p.m_velocity.x * p.m_speed * GetFrameTime();
+    p.m_position.y += p.m_velocity.y * p.m_speed * GetFrameTime();
   }
   return;
 }
 
-void Gameplay::Draw() { m_player.Draw(); }
+void Gameplay::Draw() {
+  m_player.Draw();
 
-void Gameplay::spawnProjectile() {}
+  for (auto &p : m_projectiles) {
+    DrawCircleV(p.m_position, 10, YELLOW);
+  }
+}
+
+void Gameplay::spawnProjectile(const Vector2 &pos, const Vector2 &velocity,
+                               bool isFriend) {
+  m_projectiles.push_back((Projectile){pos, velocity, isFriend, 200.0f});
+}
