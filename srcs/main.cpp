@@ -1,3 +1,4 @@
+#include "Game.hpp"
 #include "raylib.h"
 
 int main(void) {
@@ -5,30 +6,12 @@ int main(void) {
   const int HEIGHT = 600;
 
   // TODO: rename window
-  InitWindow(WIDTH, HEIGHT, "untitled Malaysian game");
+  Game game(WIDTH, HEIGHT, "Untitled Malaysian game");
 
-  bool exitWindowRequested = false;
-  bool exitWindow = false;
-
-  SetTargetFPS(60);
-
-  while (!exitWindow) {
-    if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) {
-      exitWindowRequested = true;
-    }
-
-    if (exitWindowRequested) {
-      if (IsKeyPressed(KEY_Y))
-        exitWindow = true;
-      else if (IsKeyPressed(KEY_N)) {
-        exitWindowRequested = false;
-      }
-    }
-
-    BeginDrawing();
-    EndDrawing();
+  while (!game.shouldClose()) {
+    game.Update();
+    game.Draw();
   }
 
-  CloseWindow();
   return 0;
 }
