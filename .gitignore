@@ -1,0 +1,9 @@
+*.o
+*.a
+
+game
+
+compile_commands.json
+
+notes/
+
