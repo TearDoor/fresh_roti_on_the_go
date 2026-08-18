@@ -8,20 +8,18 @@
 
 void Player::Draw() const {
 
-  Vector2 localTip = {+20, 0};
+  Vector2 localTop = {+20, 0};
   Vector2 localBackLeft = {-10, -10};
   Vector2 localBackRight = {-10, 10};
 
-  Vector2 tip = Vector2Add(m_position, Vector2Rotate(localTip, angle));
+  // rotate the points then move it to player position
+  Vector2 top = Vector2Add(m_position, Vector2Rotate(localTop, angle));
   Vector2 backLeft =
       Vector2Add(m_position, Vector2Rotate(localBackLeft, angle));
   Vector2 backRight =
       Vector2Add(m_position, Vector2Rotate(localBackRight, angle));
 
-  DrawTextEx(GetFontDefault(), TextFormat("[%i %i]", GetMouseX(), GetMouseY()),
-             Vector2Add(GetMousePosition(), (Vector2){-44, -22}), 20, 2, BLACK);
-
-  DrawTriangle(tip, backLeft, backRight, BLUE);
+  DrawTriangle(top, backLeft, backRight, BLUE);
 }
 
 void Player::Update() {
@@ -52,8 +50,8 @@ void Gameplay::Update() {
 
   if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
     Vector2 dir = {cosf(m_player.angle), sinf(m_player.angle)};
-    Vector2 pos = Vector2Scale(dir, 20.0f);
-    spawnProjectile(Vector2Add(m_player.m_position, pos), dir, true);
+    Vector2 pos = Vector2Add(m_player.m_position, Vector2Scale(dir, 20.0f));
+    m_projectiles.push_back((Projectile){pos, dir, true, 200.0f});
   }
 
   for (auto &p : m_projectiles) {
@@ -71,7 +69,7 @@ void Gameplay::Draw() {
   }
 }
 
-void Gameplay::spawnProjectile(const Vector2 &pos, const Vector2 &velocity,
-                               bool isFriend) {
-  m_projectiles.push_back((Projectile){pos, velocity, isFriend, 200.0f});
-}
+// void Gameplay::spawnProjectile(const Vector2 &pos, const Vector2 &velocity,
+//                                bool isFriend) {
+//   m_projectiles.push_back((Projectile){pos, velocity, isFriend, 200.0f});
+// }

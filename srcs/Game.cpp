@@ -10,7 +10,13 @@ Game::Game(int width, int height, const std::string &title)
 Game::~Game() { CloseWindow(); }
 
 void Game::Update() {
-  if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) {
+  // NOTE: was going to make pressing X on window show confirmation
+  // but was causing bugs in WSL so only pressing ESC shows confirmation
+  SetExitKey(KEY_NULL); // ESC no longer sets WindowShouldClose
+  if (WindowShouldClose()) {
+    m_exitWindow = true;
+  }
+  if (IsKeyPressed(KEY_ESCAPE)) {
     m_exitWindowRequested = true;
   }
 
