@@ -11,7 +11,9 @@ struct Player {
 
   Vector2 m_position;
   float m_speed;
-  float angle;
+  float m_angle;
+  double m_attackSpeed = 20.0f;
+  double m_lastFired = GetTime();
 };
 
 struct Enemy {

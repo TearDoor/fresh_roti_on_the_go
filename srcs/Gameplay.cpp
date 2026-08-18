@@ -13,11 +13,11 @@ void Player::Draw() const {
   Vector2 localBackRight = {-10, 10};
 
   // rotate the points then move it to player position
-  Vector2 top = Vector2Add(m_position, Vector2Rotate(localTop, angle));
+  Vector2 top = Vector2Add(m_position, Vector2Rotate(localTop, m_angle));
   Vector2 backLeft =
-      Vector2Add(m_position, Vector2Rotate(localBackLeft, angle));
+      Vector2Add(m_position, Vector2Rotate(localBackLeft, m_angle));
   Vector2 backRight =
-      Vector2Add(m_position, Vector2Rotate(localBackRight, angle));
+      Vector2Add(m_position, Vector2Rotate(localBackRight, m_angle));
 
   DrawTriangle(top, backLeft, backRight, BLUE);
 }
@@ -26,9 +26,9 @@ void Player::Update() {
   // mouseDirectionVector = mousePos - playerPos
   // angle (starting from +x axis) = atan2(dir.y, dir.x)
   // thats why our angle start as facing right
-  angle = atan2(GetMouseY() - m_position.y, GetMouseX() - m_position.x);
+  m_angle = atan2(GetMouseY() - m_position.y, GetMouseX() - m_position.x);
 
-  Vector2 inputDir;
+  Vector2 inputDir{0, 0};
   if (IsKeyDown(KEY_W))
     inputDir.y -= 1;
   if (IsKeyDown(KEY_S))
@@ -48,10 +48,15 @@ void Player::Update() {
 void Gameplay::Update() {
   m_player.Update();
 
-  if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-    Vector2 dir = {cosf(m_player.angle), sinf(m_player.angle)};
-    Vector2 pos = Vector2Add(m_player.m_position, Vector2Scale(dir, 20.0f));
-    m_projectiles.push_back((Projectile){pos, dir, true, 200.0f});
+  if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+    // 10 atkspd fires once per second, 20 twice, 5 once per 2 secs
+    double delay = 10.0f / m_player.m_attackSpeed;
+    if (GetTime() - m_player.m_lastFired >= delay) {
+      Vector2 dir = {cosf(m_player.m_angle), sinf(m_player.m_angle)};
+      Vector2 pos = Vector2Add(m_player.m_position, Vector2Scale(dir, 20.0f));
+      m_projectiles.push_back((Projectile){pos, dir, true, 200.0f});
+      m_player.m_lastFired = GetTime();
+    }
   }
 
   for (auto &p : m_projectiles) {
