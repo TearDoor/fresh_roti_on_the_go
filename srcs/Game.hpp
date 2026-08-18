@@ -11,8 +11,8 @@ public:
   Game(int width, int height, const std::string &title);
   ~Game();
 
-  void Update();
-  void Draw();
+  void update();
+  void draw();
 
   bool shouldClose() const { return m_exitWindow; }
 

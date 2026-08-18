@@ -3,37 +3,36 @@
 #include "raylib.h"
 #include <vector>
 
-struct Player {
-  Player() : m_position({400.0f, 300.0f}), m_speed(60.0f) {}
+#include "Player.hpp"
 
-  void Update();
-  void Draw() const;
-
-  Vector2 m_position;
-  float m_speed;
-  float m_angle;
-  double m_attackSpeed = 20.0f;
-  double m_lastFired = GetTime();
-};
+enum GameState { PLAYING, DIED, WON };
 
 struct Enemy {
-  Enemy();
-
+  Enemy(const Vector2 &pos) : m_alive(true) { setPosition(pos); }
+  int health = 20;
   Vector2 m_position;
+  Rectangle m_hitBox;
+  bool m_alive;
+
+  void setPosition(const Vector2 &pos);
 };
 
 struct Projectile {
   Vector2 m_position;
   Vector2 m_velocity;
+  RotiKind m_kind;
   bool m_isFriendly;
-  float m_speed;
+  float timeLeft;
+  bool m_alive = true;
 };
 
 class Gameplay {
 public:
-  void Update();
-  void Draw();
+  GameState update();
+  void draw() const;
+  void reset();
 
+  void spawnEnemy(const Vector2 &pos);
   void spawnProjectile(const Vector2 &pos, const Vector2 &velocity,
                        bool isFriend);
 

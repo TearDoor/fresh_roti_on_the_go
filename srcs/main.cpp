@@ -8,8 +8,8 @@ int main(void) {
   Game game(WIDTH, HEIGHT, "Untitled Malaysian game");
 
   while (!game.shouldClose()) {
-    game.Update();
-    game.Draw();
+    game.update();
+    game.draw();
   }
 
   return 0;

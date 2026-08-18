@@ -1,18 +1,20 @@
 #include "Game.hpp"
+#include "Gameplay.hpp"
 #include "raylib.h"
 
 Game::Game(int width, int height, const std::string &title)
     : m_width(width), m_height(height) {
   InitWindow(width, height, title.c_str());
   SetTargetFPS(60);
+
+  SetExitKey(KEY_NULL); // ESC no longer sets WindowShouldClose
 }
 
 Game::~Game() { CloseWindow(); }
 
-void Game::Update() {
+void Game::update() {
   // NOTE: was going to make pressing X on window show confirmation
   // but was causing bugs in WSL so only pressing ESC shows confirmation
-  SetExitKey(KEY_NULL); // ESC no longer sets WindowShouldClose
   if (WindowShouldClose()) {
     m_exitWindow = true;
   }
@@ -33,11 +35,16 @@ void Game::Update() {
   case TITLE: {
     m_frameCounter++;
 
-    if (IsKeyPressed(KEY_ENTER))
+    if (IsKeyPressed(KEY_ENTER)) {
       m_currentScreen = GAMEPLAY;
+      m_gameplay.reset();
+    }
   } break;
   case GAMEPLAY: {
-    m_gameplay.Update();
+    GameState state = m_gameplay.update();
+    if (state != PLAYING) {
+      m_currentScreen = ENDING;
+    }
 
     if (IsKeyPressed(KEY_ENTER)) {
       m_currentScreen = ENDING;
@@ -55,7 +62,7 @@ void Game::Update() {
   }
 }
 
-void Game::Draw() {
+void Game::draw() {
   BeginDrawing();
   ClearBackground(RAYWHITE);
 
@@ -69,7 +76,7 @@ void Game::Draw() {
     }
   } break;
   case GAMEPLAY: {
-    m_gameplay.Draw();
+    m_gameplay.draw();
   } break;
   case ENDING: {
     if ((m_frameCounter / 30) % 2 == 0) {
@@ -84,6 +91,8 @@ void Game::Draw() {
   }
 
   if (m_exitWindowRequested) {
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(),
+                  Fade(DARKGRAY, 0.5));
     DrawRectangle(0, 100, m_width, 200, BLACK);
     DrawText("Are you sure you want to exit? [Y/N]", 40, 180, 30, WHITE);
   }
