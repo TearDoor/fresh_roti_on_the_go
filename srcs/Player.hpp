@@ -17,6 +17,7 @@ const RotiStats K_ROTI[] = {
 };
 
 const int MAX_HEALTH = 5;
+const float DASH_SPEED = 1000.0f;
 
 struct Player {
   Player();
@@ -35,4 +36,7 @@ struct Player {
   RotiKind m_held;
   Rectangle m_hitbox;
   double m_lastFired;
+  float m_iFramesTime = 0.0f;
+  Vector2 m_dashDir = {0, 0};
+  float m_dashTime = 0.0f;
 };

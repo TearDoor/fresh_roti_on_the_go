@@ -62,11 +62,18 @@ GameState Gameplay::update() {
   }
 
   for (auto &e : m_enemies) {
-    if (CheckCollisionRecs(e.m_hitBox, m_player.m_hitbox)) {
+    if (m_player.m_iFramesTime <= 0 &&
+        CheckCollisionRecs(e.m_hitBox, m_player.m_hitbox)) {
       m_player.m_health -= 1;
       if (m_player.m_health == 0) {
         return DIED;
       }
+      // getting hit and knocked back is like being forced to dash in opposite
+      // direction
+      m_player.m_dashTime = 0.05f;
+      m_player.m_dashDir = Vector2Normalize(m_player.m_position - e.m_position);
+      m_player.m_iFramesTime = 2.0f;
+      break;
     }
   }
 

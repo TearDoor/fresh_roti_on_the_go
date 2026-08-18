@@ -33,6 +33,17 @@ void Player::update() {
   // thats why our angle start as facing right
   m_angle = atan2(GetMouseY() - m_position.y, GetMouseX() - m_position.x);
 
+  if (m_iFramesTime > 0)
+    m_iFramesTime -= GetFrameTime();
+  // in 'dashing' state (dashing, knocked back)
+  if (m_dashTime > 0) {
+    setPosition(m_position +
+                Vector2Scale(m_dashDir, DASH_SPEED * GetFrameTime()));
+    m_dashTime -= GetFrameTime();
+    return;
+  }
+
+  // WASD movement
   Vector2 inputDir{0, 0};
   if (IsKeyDown(KEY_W))
     inputDir.y -= 1;
@@ -46,6 +57,13 @@ void Player::update() {
   if (inputDir.x != 0 || inputDir.y != 0) {
     inputDir = Vector2Normalize(inputDir);
     setPosition(m_position + Vector2Scale(inputDir, m_speed * GetFrameTime()));
+  }
+
+  // SPACE to dash
+  if (IsKeyPressed(KEY_SPACE)) {
+    m_dashTime = 0.10f;
+    m_iFramesTime = 0.15f;
+    m_dashDir = inputDir;
   }
 }
 
