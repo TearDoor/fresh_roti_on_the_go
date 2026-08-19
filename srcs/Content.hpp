@@ -1,7 +1,5 @@
 #pragma once
 
-#include "raylib.h"
-
 // a file for presets
 
 enum RotiKind { CANAI = 0, TELUR, PISANG, BOM, PLANTA };
@@ -14,7 +12,7 @@ struct RotiStats {
 };
 
 inline const RotiStats K_ROTI[] = {
-    {10, 1000.0f, 20.0f, 1.0f}, // canai
+    {10, 500.0f, 10.0f, 1.0f}, // canai
 
 };
 
@@ -26,8 +24,8 @@ struct EnemyStats {
 };
 
 inline const EnemyStats K_ENEMY[] = {
-    {20, 75.0f},
-    {40, 60.0f},
+    {20, 30.0f},
+    {40, 20.0f},
 };
 
 struct SpawnEvent {

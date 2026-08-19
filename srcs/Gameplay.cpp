@@ -122,6 +122,11 @@ void Gameplay::draw() const {
     DrawRectangle(e.m_position.x, e.m_position.y, 32, 32, RED);
   }
 
+  // Draw player health left
+  for (int i = 0; i < m_player.m_health; i++) {
+    DrawCircle(20 + (i * 40), GetScreenHeight() - 30, 15, RED);
+  }
+
   if (m_gamePaused) {
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(),
                   Fade(DARKGRAY, 0.7));
