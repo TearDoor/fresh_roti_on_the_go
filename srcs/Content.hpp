@@ -33,10 +33,15 @@ struct SpawnEvent {
   const EnemyType type;
 };
 
+// clang-format off
 inline const SpawnEvent KLEVEL1[] = {
-    {1, BASIC}, {1, BASIC}, {1, BASIC}, {1, BASIC}, {3, BASIC}, {3, BASIC},
+    {1, BASIC}, {1, BASIC}, {1, BASIC}, {1, BASIC},
     {5, BASIC}, {5, BASIC}, {5, BASIC}, {5, BASIC}, {5, BASIC},
+    {8, BASIC}, {8, BASIC},
+    {9, BASIC}, {9, BASIC},
+    {11, BASIC}, {11, BASIC},
 };
+// clang-format on
 
 struct Stage {
   const int enemyCount;

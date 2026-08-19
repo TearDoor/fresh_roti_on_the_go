@@ -84,9 +84,6 @@ GameState Gameplay::update() {
     if (m_player.m_iFramesTime <= 0 &&
         CheckCollisionRecs(e.m_hitBox, m_player.m_hitbox)) {
       m_player.m_health -= 1;
-      if (m_player.m_health == 0) {
-        return DIED;
-      }
       // getting hit and knocked back is like being forced to dash in opposite
       // direction
       m_player.m_dashTime = 0.05f;
@@ -107,15 +104,19 @@ GameState Gameplay::update() {
 
   if (m_nextSpawnIndex == m_enemyCount && m_enemies.empty())
     return WON;
+  if (m_player.m_health <= 0)
+    return DIED;
 
   return PLAYING;
 }
 
-void Gameplay::draw() const {
+void Gameplay::draw(Texture2D texRoti) const {
   m_player.draw();
 
   for (auto &p : m_projectiles) {
-    DrawCircleV(p.m_position, 10, YELLOW);
+    Rectangle src = {0.0f, 0.0f, (float)texRoti.width, (float)texRoti.height};
+    DrawTexturePro(texRoti, src, {p.m_position.x, p.m_position.y, 32, 32},
+                   {-16.0f, 16.0f}, 0.0f, WHITE);
   }
 
   for (auto &e : m_enemies) {

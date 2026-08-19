@@ -43,6 +43,8 @@ void Player::update() {
 
     if (IsKeyDown(KEY_W)) {
       speed += ACCEL * deltaTime;
+    } else if (IsKeyDown(KEY_S)) {
+      speed -= ACCEL * deltaTime;
     } else {
       if (speed > 0.1) {
         speed -= FRICTION * deltaTime;
@@ -60,41 +62,9 @@ void Player::update() {
   finalPos.y = Clamp(finalPos.y, 0.0f, GetScreenHeight());
   setPosition(finalPos);
 
+  applyWallCollision();
+
   return;
-  // in 'dashing' state (dashing, knocked back)
-  if (m_dashTime > 0) {
-    finalPos =
-        m_position + Vector2Scale(m_dashDir, DASH_SPEED * GetFrameTime());
-    m_dashTime -= GetFrameTime();
-  } else {
-    // WASD movement
-    Vector2 inputDir{0, 0};
-    if (IsKeyDown(KEY_W))
-      inputDir.y -= 1;
-    if (IsKeyDown(KEY_S))
-      inputDir.y += 1;
-    if (IsKeyDown(KEY_A))
-      inputDir.x -= 1;
-    if (IsKeyDown(KEY_D))
-      inputDir.x += 1;
-
-    if (inputDir.x != 0 || inputDir.y != 0) {
-      inputDir = Vector2Normalize(inputDir);
-      finalPos = m_position + Vector2Scale(inputDir, m_speed * GetFrameTime());
-    }
-
-    // SPACE to dash
-    if (m_dashCooldown <= 0 && IsKeyPressed(KEY_SPACE)) {
-      m_dashTime = 0.10f;
-      m_iFramesTime = 0.15f;
-      m_dashDir = inputDir;
-      m_dashCooldown = DASH_CD;
-    }
-  }
-
-  finalPos.x = Clamp(finalPos.x, 0.0f, GetScreenWidth());
-  finalPos.y = Clamp(finalPos.y, 0.0f, GetScreenHeight());
-  setPosition(finalPos);
 }
 
 void Player::draw() const {
@@ -131,6 +101,17 @@ bool Player::canShoot() const {
   // 10 atkspd fires once per second, 20 twice, 5 once per 2 secs
   double delay = 10.0f / K_ROTI[m_held].fireRate;
   return (m_lastFired < 0 || GetTime() - m_lastFired >= delay);
+}
+
+void Player::applyWallCollision() {
+  if (m_hitbox.x <= 0.0f || m_hitbox.x + m_hitbox.width >= GetScreenWidth() ||
+      m_hitbox.y <= 0.0f || m_hitbox.y + m_hitbox.height >= GetScreenHeight()) {
+    m_health -= 1;
+    m_dashDir = Vector2Normalize(m_velocity) * -1;
+    m_velocity = {0.0f, 0.0f};
+    m_dashTime = 0.05f;
+    m_iFramesTime = 1.0f;
+  }
 }
 
 void Player::setPosition(const Vector2 &pos) {

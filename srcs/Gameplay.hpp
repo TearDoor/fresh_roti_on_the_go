@@ -30,7 +30,7 @@ struct Projectile {
 class Gameplay {
 public:
   GameState update();
-  void draw() const;
+  void draw(Texture2D texRoti) const;
   void reset();
 
   void spawnEnemy(EnemyType type);

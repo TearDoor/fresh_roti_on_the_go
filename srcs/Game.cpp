@@ -8,9 +8,17 @@ Game::Game(int width, int height, const std::string &title)
   SetTargetFPS(60);
 
   SetExitKey(KEY_NULL); // ESC no longer sets WindowShouldClose
+
+  m_tilemap = LoadTexture("resources/tilemap/tilemap_packed.png");
+  m_texRoti = LoadTexture("resources/textures/roti_canai.png");
 }
 
-Game::~Game() { CloseWindow(); }
+Game::~Game() {
+  UnloadTexture(m_texRoti);
+  UnloadTexture(m_tilemap);
+
+  CloseWindow();
+}
 
 void Game::update() {
   // NOTE: was going to make pressing X on window show confirmation
@@ -72,7 +80,16 @@ void Game::draw() {
     }
   } break;
   case GAMEPLAY: {
-    m_gameplay.draw();
+    // draw background
+    const int TILE_SIZE = 16;
+    Rectangle src = {16, 16, TILE_SIZE, TILE_SIZE};
+
+    for (int y = 0; y < GetScreenHeight(); y += TILE_SIZE) {
+      for (int x = 0; x < GetScreenWidth(); x += TILE_SIZE) {
+        DrawTextureRec(m_tilemap, src, {(float)x, (float)y}, WHITE);
+      }
+    }
+    m_gameplay.draw(m_texRoti);
   } break;
   case ENDING: {
     if (m_gameState == WON) {

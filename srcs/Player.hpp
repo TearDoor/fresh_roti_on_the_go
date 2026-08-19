@@ -7,7 +7,7 @@
 const int MAX_HEALTH = 5;
 const float DASH_SPEED = 1000.0f;
 const float DASH_CD = 2.0f;
-const float MAXSPEED = 200.0f;
+const float MAXSPEED = 300.0f;
 const float TURN_FACTOR = 3.5;
 const float ACCEL = 300.0f;
 const float FRICTION = 100.0f;
@@ -20,6 +20,7 @@ struct Player {
   void reset();
 
   bool canShoot() const;
+  void applyWallCollision();
   void setPosition(const Vector2 &pos);
 
   // bike controls stuff
