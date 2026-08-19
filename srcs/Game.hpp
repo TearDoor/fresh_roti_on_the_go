@@ -25,4 +25,5 @@ private:
   int m_frameCounter = 0;
 
   Gameplay m_gameplay;
+  GameState m_gameState;
 };

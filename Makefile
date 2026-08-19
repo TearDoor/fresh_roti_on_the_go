@@ -33,7 +33,7 @@ $(OBJ_DIR):
 
 # `make clean`: remove object files
 clean:
-	rm -f $(OBJS)
+	rm -rf $(OBJ_DIR)
 
 # `make fclean`: remove objects AND the binary
 fclean: clean

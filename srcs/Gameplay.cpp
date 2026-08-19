@@ -1,5 +1,7 @@
 #include "Gameplay.hpp"
+#include "Content.hpp"
 #include "Player.hpp"
+
 #include "raylib.h"
 // so that raymath can be used without triggering -Werror
 #pragma GCC diagnostic push
@@ -10,11 +12,28 @@
 #include <algorithm>
 
 GameState Gameplay::update() {
+  // nothing updates if paused
+  if (IsKeyPressed(KEY_P)) {
+    m_gamePaused = !m_gamePaused;
+  }
+  if (m_gamePaused)
+    return PLAYING;
+  // -------------------------
+
+  m_elapsed += GetFrameTime();
+  // spawn enemies
+  while (m_nextSpawnIndex < m_enemyCount &&
+         m_events[m_nextSpawnIndex].time <= m_elapsed) {
+    SpawnEvent event = KSTAGES[m_stage].spawns[m_nextSpawnIndex];
+    spawnEnemy(event.type);
+    m_nextSpawnIndex++;
+  }
+
   m_player.update();
 
   if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
     if (m_player.canShoot()) {
-      Vector2 dir = {cosf(m_player.m_angle), sinf(m_player.m_angle)};
+      Vector2 dir = {cosf(m_player.m_shootAngle), sinf(m_player.m_shootAngle)};
       Vector2 pos = Vector2Add(m_player.m_position, Vector2Scale(dir, 20.0f));
       m_projectiles.push_back((Projectile){pos, dir, m_player.m_held, true,
                                            K_ROTI[m_player.m_held].timeLeft});
@@ -23,9 +42,9 @@ GameState Gameplay::update() {
   }
 
   // debug: spawn enemy on mouse pos
-  if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
-    spawnEnemy(GetMousePosition());
-  }
+  // if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
+  //   spawnEnemy(GetMousePosition());
+  // }
 
   // projectile movement and lifetime
   for (auto &p : m_projectiles) {
@@ -42,7 +61,7 @@ GameState Gameplay::update() {
     Vector2 directionToPlayer = m_player.m_position - e.m_position;
     e.setPosition(e.m_position +
                   Vector2Scale(Vector2Normalize(directionToPlayer),
-                               75.0f * GetFrameTime()));
+                               e.m_speed * GetFrameTime()));
   }
 
   for (auto &p : m_projectiles) {
@@ -50,8 +69,8 @@ GameState Gameplay::update() {
       for (auto &e : m_enemies) {
         if (CheckCollisionCircleRec(p.m_position, 10, e.m_hitBox)) {
           // TODO: flashing animation
-          e.health -= K_ROTI[p.m_kind].damage;
-          if (e.health <= 0.0f) {
+          e.m_health -= K_ROTI[p.m_kind].damage;
+          if (e.m_health <= 0.0f) {
             e.m_alive = false;
           }
           p.m_alive = false;
@@ -72,7 +91,7 @@ GameState Gameplay::update() {
       // direction
       m_player.m_dashTime = 0.05f;
       m_player.m_dashDir = Vector2Normalize(m_player.m_position - e.m_position);
-      m_player.m_iFramesTime = 2.0f;
+      m_player.m_iFramesTime = 1.0f;
       break;
     }
   }
@@ -85,6 +104,10 @@ GameState Gameplay::update() {
   m_enemies.erase(std::remove_if(m_enemies.begin(), m_enemies.end(),
                                  [](const Enemy &e) { return !e.m_alive; }),
                   m_enemies.end());
+
+  if (m_nextSpawnIndex == m_enemyCount && m_enemies.empty())
+    return WON;
+
   return PLAYING;
 }
 
@@ -98,16 +121,55 @@ void Gameplay::draw() const {
   for (auto &e : m_enemies) {
     DrawRectangle(e.m_position.x, e.m_position.y, 32, 32, RED);
   }
+
+  if (m_gamePaused) {
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(),
+                  Fade(DARKGRAY, 0.7));
+    DrawText("GAMEPAUSED", 200, GetScreenHeight() / 2, 20, BLACK);
+  }
 }
 
 void Gameplay::reset() {
   m_player.reset();
   m_projectiles.clear();
   m_enemies.clear();
+  m_stage = 0;
+  m_spawnSide = 0;
+  m_enemyCount = KSTAGES[m_stage].enemyCount;
+  m_events = KSTAGES[m_stage].spawns;
+  m_elapsed = 0;
+  m_nextSpawnIndex = 0;
+  m_gamePaused = false;
 }
 
-void Gameplay::spawnEnemy(const Vector2 &pos) {
-  m_enemies.push_back(Enemy{pos});
+void Gameplay::spawnEnemy(EnemyType type) {
+  Vector2 spawnLocation;
+  switch (m_spawnSide) {
+  case 0:
+    spawnLocation = {0.0f, (float)GetRandomValue(10, GetScreenHeight() - 10)};
+    break;
+  case 1:
+    spawnLocation = {(float)GetScreenWidth(),
+                     (float)GetRandomValue(10, GetScreenHeight())};
+    break;
+  case 2:
+    spawnLocation = {(float)GetRandomValue(10, GetScreenHeight() - 10), 0.0f};
+    break;
+  case 3:
+    spawnLocation = {(float)GetRandomValue(10, GetScreenHeight()),
+                     (float)GetScreenHeight()};
+    break;
+  default:
+    break;
+  }
+  m_enemies.push_back(Enemy{spawnLocation, type});
+  m_spawnSide = (m_spawnSide + 1) % 4;
+}
+
+Enemy::Enemy(const Vector2 &pos, EnemyType type)
+    : m_health(K_ENEMY[type].health), m_speed(K_ENEMY[type].speed),
+      m_alive(true) {
+  setPosition(pos);
 }
 
 void Enemy::setPosition(const Vector2 &pos) {

@@ -41,12 +41,8 @@ void Game::update() {
     }
   } break;
   case GAMEPLAY: {
-    GameState state = m_gameplay.update();
-    if (state != PLAYING) {
-      m_currentScreen = ENDING;
-    }
-
-    if (IsKeyPressed(KEY_ENTER)) {
+    m_gameState = m_gameplay.update();
+    if (m_gameState != PLAYING) {
       m_currentScreen = ENDING;
     }
   } break;
@@ -79,6 +75,11 @@ void Game::draw() {
     m_gameplay.draw();
   } break;
   case ENDING: {
+    if (m_gameState == WON) {
+      DrawText("CUSTOMERS FED", 10, 10, 30, BLACK);
+    } else if (m_gameState == DIED) {
+      DrawText("YOU LOST", 10, 10, 30, RED);
+    }
     if ((m_frameCounter / 30) % 2 == 0) {
       DrawText("Press [ENTER] to go back to title",
                GetScreenWidth() / 2 -
