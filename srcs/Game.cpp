@@ -22,7 +22,8 @@ Game::Game(int width, int height, const std::string &title)
   m_assets.fxMotor = LoadSound("resources/sounds/motorcycle.mp3");
   m_assets.fxWin = LoadSound("resources/sounds/malaysia.wav");
 
-  m_assets.fontTitle = LoadFont("resources/font/NotJamLaika14.ttf");
+  m_assets.fontTitle =
+      LoadFontEx("resources/font/NotJamLaika14.ttf", 100, NULL, 0);
 }
 
 Game::~Game() {

@@ -212,7 +212,7 @@ void Gameplay::spawnEnemy(EnemyType type) {
                      (float)GetRandomValue(10, GetScreenHeight())};
     break;
   case 2:
-    spawnLocation = {(float)GetRandomValue(10, GetScreenHeight() - 10), 0.0f};
+    spawnLocation = {(float)GetRandomValue(10, GetScreenWidth() - 10), 0.0f};
     break;
   case 3:
     spawnLocation = {(float)GetRandomValue(10, GetScreenHeight()),

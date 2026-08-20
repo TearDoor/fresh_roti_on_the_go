@@ -9,7 +9,6 @@ struct Assets {
   Texture2D texRoti;
   Texture2D texPlayer;
   Texture2D texFlag;
-  Texture2D texTelur;
   Sound fxShoot;
   Sound fxHurt;
   Sound fxMotor;
@@ -86,7 +85,7 @@ struct EnemyStats {
 
 inline const EnemyStats K_ENEMY[] = {
     {20, 30.0f, 25},
-    {40, 20.0f, 106},
+    {30, 20.0f, 106},
     {10, 60.0f, 187},
 };
 
@@ -101,7 +100,8 @@ inline const SpawnEvent KLEVEL1[] = {
     {7, BASIC}, {7, BASIC},
     {11, BASIC}, {11, BASIC}, {11, FAST},
     {15, BASIC}, {15, BASIC}, {15, ELITE},
-    {18, BASIC}, {18, BASIC},
+    {20, BASIC}, {20, BASIC}, {20, FAST},
+  {30, BASIC}, {30, FAST}, {30, FAST}, {30, FAST}, {30, FAST},
 
 };
 // clang-format on
