@@ -1,6 +1,7 @@
 #pragma once
 
 #include "raylib.h"
+#include <string>
 #include <vector>
 
 #include "Player.hpp"
@@ -14,6 +15,8 @@ struct Enemy {
   Vector2 m_position;
   Rectangle m_hitBox;
   bool m_alive;
+  EnemyType m_type;
+  float m_hurtTime;
 
   void setPosition(const Vector2 &pos);
 };
@@ -29,13 +32,9 @@ struct Projectile {
 
 class Gameplay {
 public:
-  GameState update();
-  void draw(Texture2D texRoti) const;
+  GameState update(Assets &m_assets);
+  void draw(Assets &m_assets) const;
   void reset();
-
-  void spawnEnemy(EnemyType type);
-  void spawnProjectile(const Vector2 &pos, const Vector2 &velocity,
-                       bool isFriend);
 
 private:
   // game objects
@@ -43,12 +42,19 @@ private:
   std::vector<Enemy> m_enemies;
   std::vector<Projectile> m_projectiles;
 
-  // gameplay variables
+  // spawning variables
   int m_enemyCount;
   const SpawnEvent *m_events;
   int m_stage;
+  // gameplay variables
   float m_elapsed;
   int m_spawnSide;
   int m_nextSpawnIndex;
   bool m_gamePaused;
+  std::string m_message;
+  float m_messageTime;
+
+  void spawnEnemy(EnemyType type);
+  void spawnProjectile(const Vector2 &pos, const Vector2 &velocity,
+                       bool isFriend);
 };

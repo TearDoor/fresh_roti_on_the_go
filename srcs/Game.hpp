@@ -27,6 +27,5 @@ private:
   Gameplay m_gameplay;
   GameState m_gameState;
 
-  Texture2D m_tilemap;
-  Texture2D m_texRoti;
+  Assets m_assets;
 };

@@ -11,7 +11,7 @@
 
 #include <algorithm>
 
-GameState Gameplay::update() {
+GameState Gameplay::update(Assets &asset) {
   // nothing updates if paused
   if (IsKeyPressed(KEY_P)) {
     m_gamePaused = !m_gamePaused;
@@ -21,6 +21,9 @@ GameState Gameplay::update() {
   // -------------------------
 
   m_elapsed += GetFrameTime();
+  if (m_messageTime > 0.0f)
+    m_messageTime -= GetFrameTime();
+
   // spawn enemies
   while (m_nextSpawnIndex < m_enemyCount &&
          m_events[m_nextSpawnIndex].time <= m_elapsed) {
@@ -29,15 +32,22 @@ GameState Gameplay::update() {
     m_nextSpawnIndex++;
   }
 
-  m_player.update();
+  m_player.update(asset);
 
   if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-    if (m_player.canShoot()) {
-      Vector2 dir = {cosf(m_player.m_shootAngle), sinf(m_player.m_shootAngle)};
-      Vector2 pos = Vector2Add(m_player.m_position, Vector2Scale(dir, 20.0f));
-      m_projectiles.push_back((Projectile){pos, dir, m_player.m_held, true,
-                                           K_ROTI[m_player.m_held].timeLeft});
-      m_player.m_lastFired = GetTime();
+    if (Vector2Length(m_player.m_velocity) <= 0.1f) {
+      m_message = "Keep moving to shoot!";
+      m_messageTime = 1.0f;
+    } else {
+      if (m_player.canShoot()) {
+        Vector2 dir = {cosf(m_player.m_shootAngle),
+                       sinf(m_player.m_shootAngle)};
+        Vector2 pos = Vector2Add(m_player.m_position, Vector2Scale(dir, 20.0f));
+        m_projectiles.push_back((Projectile){pos, dir, m_player.m_held, true,
+                                             K_ROTI[m_player.m_held].timeLeft});
+        PlaySound(asset.fxShoot);
+        m_player.m_lastFired = GetTime();
+      }
     }
   }
 
@@ -58,17 +68,20 @@ GameState Gameplay::update() {
 
   // enemy movement (homing onto player)
   for (auto &e : m_enemies) {
+    if (e.m_hurtTime > 0.0f)
+      e.m_hurtTime -= GetFrameTime();
     Vector2 directionToPlayer = m_player.m_position - e.m_position;
     e.setPosition(e.m_position +
                   Vector2Scale(Vector2Normalize(directionToPlayer),
                                e.m_speed * GetFrameTime()));
   }
 
+  // Projectiles hit enemy
   for (auto &p : m_projectiles) {
     if (p.m_isFriendly) {
       for (auto &e : m_enemies) {
-        if (CheckCollisionCircleRec(p.m_position, 10, e.m_hitBox)) {
-          // TODO: flashing animation
+        if (CheckCollisionCircleRec(p.m_position, 16, e.m_hitBox)) {
+          e.m_hurtTime = 0.10f;
           e.m_health -= K_ROTI[p.m_kind].damage;
           if (e.m_health <= 0.0f) {
             e.m_alive = false;
@@ -86,9 +99,11 @@ GameState Gameplay::update() {
       m_player.m_health -= 1;
       // getting hit and knocked back is like being forced to dash in opposite
       // direction
-      m_player.m_dashTime = 0.05f;
+      m_player.m_dashTime = 0.1f;
       m_player.m_dashDir = Vector2Normalize(m_player.m_position - e.m_position);
       m_player.m_iFramesTime = 1.0f;
+      m_player.m_velocity = {0.0f, 0.0f};
+      PlaySound(asset.fxHurt);
       break;
     }
   }
@@ -110,18 +125,33 @@ GameState Gameplay::update() {
   return PLAYING;
 }
 
-void Gameplay::draw(Texture2D texRoti) const {
-  m_player.draw();
+void Gameplay::draw(Assets &asset) const {
+  m_player.draw(asset.texPlayer);
 
   for (auto &p : m_projectiles) {
-    Rectangle src = {0.0f, 0.0f, (float)texRoti.width, (float)texRoti.height};
-    DrawTexturePro(texRoti, src, {p.m_position.x, p.m_position.y, 32, 32},
-                   {-16.0f, 16.0f}, 0.0f, WHITE);
+    Rectangle src = {0.0f, 0.0f, (float)asset.texRoti.width,
+                     (float)asset.texRoti.height};
+    DrawTexturePro(asset.texRoti, src, {p.m_position.x, p.m_position.y, 32, 32},
+                   {16.0f, 16.0f}, 0.0f, WHITE);
+    // DEBUG
+    // DrawCircleLines(p.m_position.x, p.m_position.y, 16.0f, RED);
   }
 
   for (auto &e : m_enemies) {
-    DrawRectangle(e.m_position.x, e.m_position.y, 32, 32, RED);
+    // DrawRectangle(e.m_position.x, e.m_position.y, 32, 32, RED);
+
+    Rectangle src = asset.getRectFromID(K_ENEMY[e.m_type].texId);
+    Rectangle dst = {e.m_position.x, e.m_position.y, 32, 32};
+    DrawTexturePro(asset.tilemap, src, dst, {0.0f, 0.0f}, 0.0f, WHITE);
+    if (e.m_hurtTime > 0.0f) {
+      BeginBlendMode(BLEND_ADDITIVE);
+      DrawTexturePro(asset.tilemap, src, dst, {0.0f, 0.0f}, 0.0f, WHITE);
+      EndBlendMode();
+    }
   }
+
+  if (m_messageTime > 0.0f)
+    DrawText(m_message.c_str(), 20, 20, 20, BLACK);
 
   // Draw player health left
   for (int i = 0; i < m_player.m_health; i++) {
@@ -146,6 +176,11 @@ void Gameplay::reset() {
   m_elapsed = 0;
   m_nextSpawnIndex = 0;
   m_gamePaused = false;
+  m_message = "Launch roti canai to feed customers.\n"
+              "Don't drive into the customers or the wall.\n"
+              "W: Accelerate  S: Brake\nA/D: Steer\n"
+              "LClick: shoot roti";
+  m_messageTime = 5.0f;
 }
 
 void Gameplay::spawnEnemy(EnemyType type) {
@@ -174,7 +209,7 @@ void Gameplay::spawnEnemy(EnemyType type) {
 
 Enemy::Enemy(const Vector2 &pos, EnemyType type)
     : m_health(K_ENEMY[type].health), m_speed(K_ENEMY[type].speed),
-      m_alive(true) {
+      m_alive(true), m_type(type), m_hurtTime(0.0f) {
   setPosition(pos);
 }
 

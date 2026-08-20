@@ -12,7 +12,7 @@ LDFLAGS  := -L$(RAYLIB_DIR) -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 # List every .cpp file in the exercise here
 SRC_DIR := srcs
 OBJ_DIR := objs
-SRCS := main.cpp Game.cpp Gameplay.cpp Player.cpp
+SRCS := main.cpp Game.cpp Gameplay.cpp Player.cpp Content.cpp
 OBJS := $(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
 
 # `make` / `make all`: build the binary

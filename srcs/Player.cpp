@@ -7,10 +7,10 @@
 #pragma GCC diagnostic pop
 
 Player::Player()
-    : m_health(MAX_HEALTH), m_position({0, 0}), m_speed(100.0f),
-      m_shootAngle(0.0f), m_held(CANAI), m_lastFired(-1) {}
+    : m_health(MAX_HEALTH), m_position({0, 0}), m_shootAngle(0.0f),
+      m_held(CANAI), m_lastFired(-1) {}
 
-void Player::update() {
+void Player::update(Assets &asset) {
   // mouseDirectionVector = mousePos - playerPos
   // angle (starting from +x axis) = atan2(dir.y, dir.x)
   // thats why our angle start as facing right
@@ -41,6 +41,8 @@ void Player::update() {
 
     Vector2 forward = {cos(m_facingAngle), sin(m_facingAngle)};
 
+    if (IsKeyPressed(KEY_W))
+      PlaySound(asset.fxMotor);
     if (IsKeyDown(KEY_W)) {
       speed += ACCEL * deltaTime;
     } else if (IsKeyDown(KEY_S)) {
@@ -62,27 +64,25 @@ void Player::update() {
   finalPos.y = Clamp(finalPos.y, 0.0f, GetScreenHeight());
   setPosition(finalPos);
 
-  applyWallCollision();
+  if (m_iFramesTime <= 0)
+    applyWallCollision();
 
   return;
 }
 
-void Player::draw() const {
+void Player::draw(Texture2D texPlayer) const {
+  Rectangle src = {0.0f, 0.0f, (float)texPlayer.width, (float)texPlayer.height};
+  Rectangle dst = {m_position.x, m_position.y, 32, 32};
 
-  Vector2 localTop = {+20, 0};
-  Vector2 localBackLeft = {-10, -10};
-  Vector2 localBackRight = {-10, 10};
+  Color tint = WHITE;
+  // flash red when hurt/invicibility time
+  if (m_iFramesTime > 0.0f)
+    tint = (fmodf(m_iFramesTime, 0.12) < 0.06) ? RED : WHITE;
+  DrawTexturePro(texPlayer, src, dst, {16.0, 16.0}, m_facingAngle * RAD2DEG,
+                 tint);
 
-  // rotate the points then move it to player position
-  Vector2 top = Vector2Add(m_position, Vector2Rotate(localTop, m_facingAngle));
-  Vector2 backLeft =
-      Vector2Add(m_position, Vector2Rotate(localBackLeft, m_facingAngle));
-  Vector2 backRight =
-      Vector2Add(m_position, Vector2Rotate(localBackRight, m_facingAngle));
-
-  DrawTriangle(top, backLeft, backRight, BLUE);
   // debug hitbox
-  DrawRectangleLinesEx(m_hitbox, 1, RED);
+  // DrawRectangleLinesEx(m_hitbox, 1, RED);
 }
 
 void Player::reset() {

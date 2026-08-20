@@ -1,4 +1,5 @@
 #include "Game.hpp"
+#include "Content.hpp"
 #include "Gameplay.hpp"
 #include "raylib.h"
 
@@ -9,13 +10,29 @@ Game::Game(int width, int height, const std::string &title)
 
   SetExitKey(KEY_NULL); // ESC no longer sets WindowShouldClose
 
-  m_tilemap = LoadTexture("resources/tilemap/tilemap_packed.png");
-  m_texRoti = LoadTexture("resources/textures/roti_canai.png");
+  m_assets.tilemap = LoadTexture("resources/tilemap/tilemap.png");
+  m_assets.texRoti = LoadTexture("resources/textures/roti_canai.png");
+  m_assets.texFlag = LoadTexture("resources/textures/Malaysia_flag.png");
+  m_assets.texPlayer = LoadTexture("resources/textures/player.png");
+
+  InitAudioDevice();
+
+  m_assets.fxShoot = LoadSound("resources/sounds/shoot.wav");
+  m_assets.fxHurt = LoadSound("resources/sounds/hurt.wav");
+  m_assets.fxMotor = LoadSound("resources/sounds/motorcycle.mp3");
 }
 
 Game::~Game() {
-  UnloadTexture(m_texRoti);
-  UnloadTexture(m_tilemap);
+  UnloadSound(m_assets.fxShoot);
+  UnloadSound(m_assets.fxHurt);
+  UnloadSound(m_assets.fxMotor);
+
+  CloseAudioDevice();
+
+  UnloadTexture(m_assets.texRoti);
+  UnloadTexture(m_assets.tilemap);
+  UnloadTexture(m_assets.texFlag);
+  UnloadTexture(m_assets.texPlayer);
 
   CloseWindow();
 }
@@ -49,7 +66,7 @@ void Game::update() {
     }
   } break;
   case GAMEPLAY: {
-    m_gameState = m_gameplay.update();
+    m_gameState = m_gameplay.update(m_assets);
     if (m_gameState != PLAYING) {
       m_currentScreen = ENDING;
     }
@@ -70,6 +87,11 @@ void Game::draw() {
   BeginDrawing();
   ClearBackground(RAYWHITE);
 
+  // DrawTexturePro(
+  //     m_assets.texFlag,
+  //     {0, 0, (float)m_assets.texFlag.width, (float)m_assets.texFlag.height},
+  //     {0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()}, {0, 0},
+  //     0.0f, Fade(WHITE, 0.5f));
   switch (m_currentScreen) {
   case TITLE: {
     if ((m_frameCounter / 30) % 2 == 0) {
@@ -81,15 +103,19 @@ void Game::draw() {
   } break;
   case GAMEPLAY: {
     // draw background
-    const int TILE_SIZE = 16;
-    Rectangle src = {16, 16, TILE_SIZE, TILE_SIZE};
+    for (int y = 0; y < MAP_ROWS; y++) {
+      for (int x = 0; x < MAP_COLS; x++) {
+        int index = x + (y * MAP_COLS);
 
-    for (int y = 0; y < GetScreenHeight(); y += TILE_SIZE) {
-      for (int x = 0; x < GetScreenWidth(); x += TILE_SIZE) {
-        DrawTextureRec(m_tilemap, src, {(float)x, (float)y}, WHITE);
+        Rectangle src = m_assets.getRectFromID(KTILEMAP[index]);
+        Rectangle dst = {(float)x * MAP_TILESIZE, (float)y * MAP_TILESIZE, 32,
+                         32};
+
+        DrawTexturePro(m_assets.tilemap, src, dst, {0, 0}, 0.0f, WHITE);
       }
     }
-    m_gameplay.draw(m_texRoti);
+
+    m_gameplay.draw(m_assets);
   } break;
   case ENDING: {
     if (m_gameState == WON) {

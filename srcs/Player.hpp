@@ -15,8 +15,8 @@ const float FRICTION = 100.0f;
 struct Player {
   Player();
 
-  void update();
-  void draw() const;
+  void update(Assets &asset);
+  void draw(Texture2D texPlayer) const;
   void reset();
 
   bool canShoot() const;
@@ -29,7 +29,6 @@ struct Player {
 
   int m_health;
   Vector2 m_position;
-  float m_speed;
   float m_shootAngle;
   RotiKind m_held;
   Rectangle m_hitbox;
