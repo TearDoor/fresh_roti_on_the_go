@@ -12,6 +12,13 @@
 #include <algorithm>
 
 GameState Gameplay::update(Assets &asset) {
+  if (m_winningTime > 0.0f) {
+    m_winningTime -= GetFrameTime();
+    if (m_winningTime <= 0.0f)
+      return WON;
+
+    return PLAYING;
+  }
   // nothing updates if paused
   if (IsKeyPressed(KEY_P)) {
     m_gamePaused = !m_gamePaused;
@@ -117,8 +124,10 @@ GameState Gameplay::update(Assets &asset) {
                                  [](const Enemy &e) { return !e.m_alive; }),
                   m_enemies.end());
 
-  if (m_nextSpawnIndex == m_enemyCount && m_enemies.empty())
-    return WON;
+  if (m_nextSpawnIndex == m_enemyCount && m_enemies.empty()) {
+    m_winningTime = 2.0f;
+    PlaySound(asset.fxWin);
+  }
   if (m_player.m_health <= 0)
     return DIED;
 
@@ -163,6 +172,14 @@ void Gameplay::draw(Assets &asset) const {
                   Fade(DARKGRAY, 0.7));
     DrawText("GAMEPAUSED", 200, GetScreenHeight() / 2, 20, BLACK);
   }
+
+  if (m_winningTime > 0.0f) {
+    DrawTexturePro(
+        asset.texFlag,
+        {0, 0, (float)asset.texFlag.width, (float)asset.texFlag.height},
+        {0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()}, {0, 0}, 0.0f,
+        Fade(WHITE, 0.5f));
+  }
 }
 
 void Gameplay::reset() {
@@ -181,6 +198,7 @@ void Gameplay::reset() {
               "W: Accelerate  S: Brake\nA/D: Steer\n"
               "LClick: shoot roti";
   m_messageTime = 5.0f;
+  m_winningTime = 0.0f;
 }
 
 void Gameplay::spawnEnemy(EnemyType type) {

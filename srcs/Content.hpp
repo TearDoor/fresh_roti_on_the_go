@@ -13,6 +13,8 @@ struct Assets {
   Sound fxShoot;
   Sound fxHurt;
   Sound fxMotor;
+  Sound fxWin;
+  Font fontTitle;
 
   Rectangle getRectFromID(int id);
 };
@@ -85,7 +87,7 @@ struct EnemyStats {
 inline const EnemyStats K_ENEMY[] = {
     {20, 30.0f, 25},
     {40, 20.0f, 106},
-    {10, 40.0f, 187},
+    {10, 60.0f, 187},
 };
 
 struct SpawnEvent {

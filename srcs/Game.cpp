@@ -20,12 +20,18 @@ Game::Game(int width, int height, const std::string &title)
   m_assets.fxShoot = LoadSound("resources/sounds/shoot.wav");
   m_assets.fxHurt = LoadSound("resources/sounds/hurt.wav");
   m_assets.fxMotor = LoadSound("resources/sounds/motorcycle.mp3");
+  m_assets.fxWin = LoadSound("resources/sounds/malaysia.wav");
+
+  m_assets.fontTitle = LoadFont("resources/font/NotJamLaika14.ttf");
 }
 
 Game::~Game() {
+  UnloadFont(m_assets.fontTitle);
+
   UnloadSound(m_assets.fxShoot);
   UnloadSound(m_assets.fxHurt);
   UnloadSound(m_assets.fxMotor);
+  UnloadSound(m_assets.fxWin);
 
   CloseAudioDevice();
 
@@ -94,11 +100,14 @@ void Game::draw() {
   //     0.0f, Fade(WHITE, 0.5f));
   switch (m_currentScreen) {
   case TITLE: {
+    ClearBackground(BEIGE);
+    DrawTextEx(m_assets.fontTitle, "FRESH ROTI\nON THE GO", {100.0f, 100.0f},
+               100, 0.0f, BROWN);
     if ((m_frameCounter / 30) % 2 == 0) {
       DrawText("Press [ENTER] to start",
                GetScreenWidth() / 2 -
                    MeasureText("Press [Enter] to start", 20) / 2,
-               GetScreenHeight() / 2 + 60, 20, DARKGRAY);
+               GetScreenHeight() / 2 + 60, 20, RAYWHITE);
     }
   } break;
   case GAMEPLAY: {
@@ -119,15 +128,18 @@ void Game::draw() {
   } break;
   case ENDING: {
     if (m_gameState == WON) {
-      DrawText("CUSTOMERS FED", 10, 10, 30, BLACK);
+      ClearBackground(BEIGE);
+      DrawTextEx(m_assets.fontTitle, "CUSTOMERS FED", {100.0f, 100.0f}, 100,
+                 0.0f, BLACK);
     } else if (m_gameState == DIED) {
-      DrawText("YOU LOST", 10, 10, 30, RED);
+      ClearBackground(DARKGRAY);
+      DrawText("YOU LOST", 100, 100, 30, RED);
     }
     if ((m_frameCounter / 30) % 2 == 0) {
       DrawText("Press [ENTER] to go back to title",
                GetScreenWidth() / 2 -
                    MeasureText("Press [Enter] to go back to title", 20) / 2,
-               GetScreenHeight() / 2 + 60, 20, DARKGRAY);
+               GetScreenHeight() / 2 + 60, 20, RAYWHITE);
     }
   } break;
   default:

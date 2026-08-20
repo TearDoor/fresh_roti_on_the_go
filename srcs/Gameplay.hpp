@@ -53,6 +53,7 @@ private:
   bool m_gamePaused;
   std::string m_message;
   float m_messageTime;
+  float m_winningTime;
 
   void spawnEnemy(EnemyType type);
   void spawnProjectile(const Vector2 &pos, const Vector2 &velocity,

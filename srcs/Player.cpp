@@ -109,7 +109,7 @@ void Player::applyWallCollision() {
     m_health -= 1;
     m_dashDir = Vector2Normalize(m_velocity) * -1;
     m_velocity = {0.0f, 0.0f};
-    m_dashTime = 0.05f;
+    m_dashTime = 0.1f;
     m_iFramesTime = 1.0f;
   }
 }

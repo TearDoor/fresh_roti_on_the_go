@@ -10,3 +10,5 @@ Player character - [itch.io](https://tmd-studios.itch.io/cars)
 sound effects - [rFXGen](https://raylibtech.itch.io/rfxgen)
 
 sound effects - [BeepBox](https://www.beepbox.co/)
+
+font - [itch.io](https://not-jam.itch.io/not-jam-font-pack)
